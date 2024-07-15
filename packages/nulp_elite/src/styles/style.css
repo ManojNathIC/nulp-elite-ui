@@ -982,7 +982,7 @@ button {
     margin: 0 140px !important;
   }
   .dashboard .MuiFormControl-root {
-    width: 230px;
+    /* width: 230px; */
     margin-bottom: 22px;
     padding-right: 10px;
   }
@@ -999,6 +999,9 @@ button {
     gap: 16px !important;
     grid-template-columns: repeat(5, 1fr) !important;
     margin-left: -4px !important;
+  }
+  .custom-date .MuiFormControl-root.MuiTextField-root{
+    width: 95% !important;
   }
   .dashboard-card {
     border-radius: 10px;

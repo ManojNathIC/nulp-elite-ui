@@ -60,11 +60,12 @@ const EventDetails = () => {
   const [batchData, setBatchData] = useState();
   const [canEnroll, setCanEnroll] = useState(false);
   const [canJoin, setCanJoin] = useState();
+  const [eventVisibility, setEventVisibility] = useState();
 
   const [isRecorded, setIsRecorded] = useState();
   const [eventEnded, setEventEnded] = useState();
 
-  const [isEnrolled, setIsEnrolled] = useState(false);
+  const [isEnrolled, setIsEnrolled] = useState();
   const [showEnrollmentSnackbar, setShowEnrollmentSnackbar] = useState(false);
   const [isRegStart, setIsRegStart] = useState();
   const [regEnd, setRegEnd] = useState();
@@ -77,6 +78,7 @@ const EventDetails = () => {
   });
   const [consent, setConsent] = useState(consenttext);
   const [emailError, setEmailError] = useState(false);
+  console.log("isEnrolled origin-----", isEnrolled);
 
   const { t } = useTranslation();
   const showErrorMessage = (msg) => {
@@ -141,6 +143,7 @@ const EventDetails = () => {
         }
         const data = await response.json();
         console.log("event data---", data);
+        setEventVisibility(data.result.event.eventVisibility);
         setDetailDate(data.result.event);
         getUserData(data.result.event.owner, "creator");
         handleEnrollUnenrollBtn(
@@ -163,8 +166,6 @@ const EventDetails = () => {
     fetchBatchData();
     getUserData(_userId, "loggedIn");
     checkEnrolledCourse();
-    // setIsEnrolled(isEnrolledCheck());
-    // console.log("isEnrolled---", isEnrolledCheck());
   }, []);
 
   const fetchBatchData = async () => {
@@ -224,12 +225,14 @@ const EventDetails = () => {
       setUserCourseData(data.result.courses);
       if (data.result.courses.length > 0) {
         data.result.courses.map((event) => {
+          console.log("isEnrolled enrollment list API 1-----", isEnrolled);
+
           if (event?.identifier === detailData?.identifier) {
             setIsEnrolled(true);
           }
         });
       }
-      console.log(isEnrolled);
+      console.log("isEnrolled enrollment list API 2-----", isEnrolled);
     } catch (error) {
       console.error("Error while fetching courses:", error);
       showErrorMessage(t("FAILED_TO_FETCH_DATA"));
@@ -291,6 +294,8 @@ const EventDetails = () => {
       const response = await axios.post(url, requestBody);
       if (response.status === 200) {
         setIsEnrolled(true);
+        console.log("isEnrolled enrol API-----", isEnrolled);
+
         setShowEnrollmentSnackbar(true);
         registerEvent(formData, detailData);
       } else {
@@ -308,13 +313,7 @@ const EventDetails = () => {
     }
     setShowEnrollmentSnackbar(false);
   };
-  const formatDateForCompair = (date) => {
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, "0"); // Months are zero-indexed
-    const day = String(date.getDate()).padStart(2, "0");
 
-    return `${year}-${month}-${day}`;
-  };
   const formatDate = (dateString) => {
     const date = new Date(dateString);
     return date.toLocaleDateString("en-GB", {
@@ -323,22 +322,29 @@ const EventDetails = () => {
       year: "numeric",
     });
   };
-  const formatTimeWithTimezone = (date) => {
-    const hours = String(date.getHours()).padStart(2, "0");
-    const minutes = String(date.getMinutes()).padStart(2, "0");
-    const seconds = String(date.getSeconds()).padStart(2, "0");
 
-    const timezoneOffset = -date.getTimezoneOffset();
-    const offsetHours = String(
-      Math.floor(Math.abs(timezoneOffset) / 60)
-    ).padStart(2, "0");
-    const offsetMinutes = String(Math.abs(timezoneOffset) % 60).padStart(
-      2,
-      "0"
-    );
-    const offsetSign = timezoneOffset >= 0 ? "+" : "-";
-
-    return `${hours}:${minutes}:${seconds}${offsetSign}${offsetHours}:${offsetMinutes}`;
+  const managePublicPrivateEvent = (button) => {
+    if (eventVisibility && eventVisibility === "Public" && button === "reg") {
+      handleOpenConsentModal();
+    } else if (
+      eventVisibility &&
+      eventVisibility === "Private" &&
+      button === "join"
+    ) {
+      handleOpenConsentModal();
+    } else if (
+      eventVisibility &&
+      eventVisibility === "Public" &&
+      button === "join"
+    ) {
+      attendWebinar();
+    } else if (
+      eventVisibility &&
+      eventVisibility === "Private" &&
+      button === "reg"
+    ) {
+      showErrorMessage("Can not Register to this event as it is private");
+    }
   };
 
   const handleEnrollUnenrollBtn = (enrollmentStart, enrollmentEnd) => {
@@ -397,12 +403,8 @@ const EventDetails = () => {
     //   setCanJoin(false);
     // }
 
-    const startDateTimeNew = new Date(
-      "Sat Jul 13 2024 16:50:10 GMT+0530"
-    ).getTime();
-    const endDateTimeNew = new Date(
-      "Sat Jul 13 2024 17:50:10 GMT+0530"
-    ).getTime(); // Assuming you have endDateTime
+    const startDateTimeNew = startDateTime.getTime();
+    const endDateTimeNew = endDateTime.getTime(); // Assuming you have endDateTime
     const todayDateNew = new Date().getTime();
 
     const tenMinutesBeforeStart = startDateTimeNew - 10 * 60 * 1000;
@@ -497,6 +499,8 @@ const EventDetails = () => {
       const response = await axios.post(url, requestBody);
       if (response.status === 200) {
         setIsEnrolled(false);
+        console.log("isEnrolled unenrol API-----", isEnrolled);
+
         setShowEnrollmentSnackbar(true);
         registerEvent(formData, detailData);
       } else {
@@ -635,44 +639,57 @@ const EventDetails = () => {
                 </Box>
               </Box>
 
-              {canEnroll && !isEnrolled && (
-                <div>
+              {eventVisibility &&
+                canEnroll &&
+                !isEnrolled &&
+                eventVisibility == "Public" && (
+                  <div>
                     <Box
-                    className="h5-title mb-20 xs-hide "
+                      className="h5-title mb-20 xs-hide "
+                      style={{ fontWeight: "400" }}
+                    >
+                      Registration will be ending on:{" "}
+                      {formatDate(detailData.registrationEndDate)}
+                    </Box>{" "}
+                    <Box className="xs-hide">
+                      <Button
+                        type="button"
+                        className="custom-btn-success"
+                        style={{
+                          borderRadius: "10px",
+                          color: "#fff",
+                          padding: "10px 35px",
+                          fontWeight: "500",
+                          fontSize: "12px",
+                          border: "solid 1px #0e7a9c",
+                          background: "#0e7a9c",
+                          marginTop: "10px",
+                        }}
+                        onClick={managePublicPrivateEvent("reg")}
+                      >
+                        {t("REGISTER_WEBINAR")}
+                      </Button>
+                    </Box>
+                  </div>
+                )}
+              {eventVisibility &&
+                eventVisibility == "Private" &&
+                !isEnrolled && (
+                  <Box
+                    className="h5-title mb-20 xs-hide"
                     style={{ fontWeight: "400" }}
                   >
-                    Registration will be ending on:{" "}
-                    {formatDate(detailData.registrationEndDate)}
+                    <Alert severity="error">
+                      Can not Register to this event as it is private
+                    </Alert>
                   </Box>
-                  {" "}
-                  <Box className="xs-hide">
-                    <Button
-                      type="button"
-                      className="custom-btn-success"
-                      style={{
-                        borderRadius: "10px",
-                        color: "#fff",
-                        padding: "10px 35px",
-                        fontWeight: "500",
-                        fontSize: "12px",
-                        border: "solid 1px #0e7a9c",
-                        background: "#0e7a9c",
-                        marginTop: "10px",
-                      }}
-                      onClick={handleOpenConsentModal}
-                    >
-                      {t("REGISTER_WEBINAR")}
-                    </Button>
-                  </Box>
-                
-                </div>
-              )}
+                )}
               {isEnrolled && (
                 <Box className="d-flex xs-hide">
                   <Button
                     type="button"
                     onClick={() => {
-                      attendWebinar();
+                      managePublicPrivateEvent("join");
                     }}
                     // onClick={attendWebinar}
                     style={{
@@ -847,7 +864,6 @@ const EventDetails = () => {
                       {t("REGISTER_WEBINAR")}
                     </Button>
                   </Box>
-                 
                 </div>
               )}
               {isEnrolled && (

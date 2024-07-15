@@ -139,27 +139,28 @@ const Player = () => {
       <Container maxWidth="xl" role="main" className="container-pb player">
         <Grid container spacing={2}>
           <Grid item xs={8}>
-            <Breadcrumbs
-              aria-label="breadcrumb"
-              style={{
-                padding: "25px 0",
-                fontSize: "16px",
-                fontWeight: "600",
-              }}
-            >
-              <Link underline="hover" color="#004367" href="/">
-                {t("COURSES")}
-              </Link>
-              <Link
-                underline="hover"
-                href=""
-                aria-current="page"
-                color="#484848"
+            {lesson && (
+              <Breadcrumbs
+                aria-label="breadcrumb"
+                style={{
+                  padding: "25px 0",
+                  fontSize: "16px",
+                  fontWeight: "600",
+                }}
               >
-                Case of Urban Sanitation in India
-                {/* {userData?.result?.content?.name} */}
-              </Link>
-            </Breadcrumbs>
+                {/* <Link underline="hover" color="#004367" href="/">
+                {t("COURSES")}
+              </Link> */}
+                <Link
+                  underline="hover"
+                  href=""
+                  aria-current="page"
+                  color="#484848"
+                >
+                  {lesson?.name}
+                </Link>
+              </Breadcrumbs>
+            )}
           </Grid>
           <Grid item xs={4}>
             <Link

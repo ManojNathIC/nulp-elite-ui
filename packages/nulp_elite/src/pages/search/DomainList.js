@@ -32,6 +32,9 @@ import { Loading } from "@shiksha/common-lib";
 import { Button } from "@mui/material";
 import axios from "axios";
 import dayjs from "dayjs";
+import DiscussionForumAnnouncement from "components/DiscussionForumAnnouncement";
+import LearnathonSection from "components/LearnathonSection";
+import AnnouncementCarousel from "components/AnnouncementCarousel";
 
 const Item = styled(Paper)(({ theme }) => ({
   backgroundColor: theme.palette.mode === "dark" ? "#1A2027" : "#fff",
@@ -452,7 +455,7 @@ const DomainList = ({ globalSearchQuery }) => {
           se_boards: [null],
           // primaryCategory: ["Course"],
           visibility: ["Default", "Parent"],
-          identifier:[
+          identifier: [
             "do_11422330454242099211",
             "do_11420352388390912013",
             "do_1136550052517314561308",
@@ -462,8 +465,8 @@ const DomainList = ({ globalSearchQuery }) => {
             "do_1140067897586974721570",
             "do_1139973490818334721328",
             "do_114165835604836352120",
-            "do_11420278272295731211"
-          ]
+            "do_11420278272295731211",
+          ],
         },
         limit: 100,
         sort_by: {
@@ -655,8 +658,10 @@ const DomainList = ({ globalSearchQuery }) => {
           role="main"
         >
           {error && <Alert severity="error">{error}</Alert>}
-
-          {(isLearnathonStarted) && (
+          <AnnouncementCarousel />
+          <DiscussionForumAnnouncement />
+          <LearnathonSection />
+          {isLearnathonStarted && (
             <Box className="lern-box">
               <Box>
                 <Grid container>
@@ -709,13 +714,14 @@ const DomainList = ({ globalSearchQuery }) => {
                           </Button>
                         </Grid>
                         {isAfterSubmission && (
-                        <Grid item xs={12}>
-                          <Button 
-                             className="viewAll" 
-                             onClick={handleCheckUser}>
-                             {t("SEE_YOUR_SUBMISSION")}
-                          </Button>
-                        </Grid>
+                          <Grid item xs={12}>
+                            <Button
+                              className="viewAll"
+                              onClick={handleCheckUser}
+                            >
+                              {t("SEE_YOUR_SUBMISSION")}
+                            </Button>
+                          </Grid>
                         )}
                       </Grid>
                     </Grid>
@@ -741,12 +747,13 @@ const DomainList = ({ globalSearchQuery }) => {
                         )}
                         {isAfterSubmission && (
                           <Grid item xs={12}>
-                            <Button 
-                             className="viewAll" 
-                             onClick={handleCheckUser}>
-                            {t("SEE_YOUR_SUBMISSION")}
+                            <Button
+                              className="viewAll"
+                              onClick={handleCheckUser}
+                            >
+                              {t("SEE_YOUR_SUBMISSION")}
                             </Button>
-                          </Grid>  
+                          </Grid>
                         )}
                         {isReviewNow && isReviewer && (
                           <Grid item xs={12}>
